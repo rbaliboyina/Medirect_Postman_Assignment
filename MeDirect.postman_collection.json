@@ -1,0 +1,633 @@
+{
+	"info": {
+		"_postman_id": "2ef2fc11-5fb5-4ac2-a0df-33202e644055",
+		"name": "MeDirect",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "6714925"
+	},
+	"item": [
+		{
+			"name": "authentication",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"let response = pm.response.json();\r",
+							"pm.environment.set(\"auth_token\", response.token)\r",
+							"console.log(\"Token received:\", response.token);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"username\" : \"admin\",\r\n    \"password\" : \"password123\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/auth",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"auth"
+					]
+				},
+				"description": "Generated from cURL: curl -X POST \\\r\n  https://restful-booker.herokuapp.com/auth \\\r\n  -H 'Content-Type: application/json' \\\r\n  -d '{\r\n    \"username\" : \"admin\",\r\n    \"password\" : \"password123\"\r\n}'"
+			},
+			"response": []
+		},
+		{
+			"name": "booking",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Function to generate a random string from a set of characters\r",
+							"/*function getRandomString(length, chars) {\r",
+							"    let result = \"\";\r",
+							"    for (let i = 0; i < length; i++) {\r",
+							"        result += chars.charAt(Math.floor(Math.random() * chars.length));\r",
+							"    }\r",
+							"    return result;\r",
+							"}*/\r",
+							"\r",
+							"// Function to generate a realistic-looking random first name\r",
+							"function generateRandomFirstName() {\r",
+							"    const prefixes = [\"Jo\", \"Em\", \"Mi\", \"Li\", \"Da\", \"El\", \"Sa\", \"Chr\", \"Ol\", \"Al\"];\r",
+							"    const suffixes = [\"hn\", \"ily\", \"chael\", \"am\", \"vid\", \"ex\", \"rah\", \"is\", \"ivia\", \"ice\"];\r",
+							"    return prefixes[Math.floor(Math.random() * prefixes.length)] + suffixes[Math.floor(Math.random() * suffixes.length)];\r",
+							"}\r",
+							"\r",
+							"// Function to generate a realistic-looking random last name\r",
+							"function generateRandomLastName() {\r",
+							"    const prefixes = [\"Smi\", \"Joh\", \"Bro\", \"Tay\", \"Wil\", \"Dav\", \"And\", \"Mil\", \"Tho\", \"Gar\"];\r",
+							"    const suffixes = [\"th\", \"son\", \"wn\", \"lor\", \"son\", \"is\", \"erson\", \"ler\", \"mas\", \"cia\"];\r",
+							"    return prefixes[Math.floor(Math.random() * prefixes.length)] + suffixes[Math.floor(Math.random() * suffixes.length)];\r",
+							"}\r",
+							"\r",
+							"// Function to generate a random price between 50 and 500\r",
+							"function getRandomPrice() {\r",
+							"    return Math.floor(Math.random() * (500 - 50 + 1)) + 50;\r",
+							"}\r",
+							"\r",
+							"// Function to generate a random boolean\r",
+							"function getRandomBoolean() {\r",
+							"    return Math.random() < 0.5;\r",
+							"}\r",
+							"\r",
+							"// Function to generate a random date between a given range\r",
+							"function getRandomDate(start, end) {\r",
+							"    const date = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));\r",
+							"    return date.toISOString().split(\"T\")[0]; // Format: YYYY-MM-DD\r",
+							"}\r",
+							"\r",
+							"// Function to generate a random additional need\r",
+							"function getRandomAdditionalNeed() {\r",
+							"    const words = [\"Breakfast\", \"Lunch\", \"Dinner\", \"WiFi\", \"Parking\", \"Air Conditioning\"];\r",
+							"    return words[Math.floor(Math.random() * words.length)];\r",
+							"}\r",
+							"\r",
+							"// Generate and set variables\r",
+							"pm.variables.set(\"firstname\", generateRandomFirstName());\r",
+							"pm.variables.set(\"lastname\", generateRandomLastName());\r",
+							"pm.variables.set(\"totalprice\", getRandomPrice());\r",
+							"pm.variables.set(\"depositpaid\", getRandomBoolean());\r",
+							"\r",
+							"const checkinDate = getRandomDate(new Date(\"2023-01-01\"), new Date());\r",
+							"const checkoutDate = getRandomDate(new Date(checkinDate), new Date(\"2025-12-31\"));\r",
+							"\r",
+							"pm.variables.set(\"checkin\", checkinDate);\r",
+							"pm.variables.set(\"checkout\", checkoutDate);\r",
+							"pm.variables.set(\"additionalneeds\", getRandomAdditionalNeed());\r",
+							"\r",
+							"// Log generated data in Postman Console\r",
+							"console.log(\"Generated Test Data:\");\r",
+							"console.log(\"First Name:\", pm.variables.get(\"firstname\"));\r",
+							"console.log(\"Last Name:\", pm.variables.get(\"lastname\"));\r",
+							"console.log(\"Total Price:\", pm.variables.get(\"totalprice\"));\r",
+							"console.log(\"Deposit Paid:\", pm.variables.get(\"depositpaid\"));\r",
+							"console.log(\"Check-in Date:\", pm.variables.get(\"checkin\"));\r",
+							"console.log(\"Check-out Date:\", pm.variables.get(\"checkout\"));\r",
+							"console.log(\"Additional Needs:\", pm.variables.get(\"additionalneeds\"));"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Check if response code is 200 (OK)\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.response.to.have.status(201);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response is valid JSON\", function () {\r",
+							"    pm.response.to.be.json;\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response contains expected keys\", function () {\r",
+							"    let jsonData = pm.response.json();\r",
+							"    // Check if top-level keys exist\r",
+							"    pm.expect(jsonData).to.have.property(\"bookingid\");\r",
+							"    pm.expect(jsonData).to.have.property(\"booking\");\r",
+							"\r",
+							"    // Check if \"booking\" object contains required fields\r",
+							"    pm.expect(jsonData.booking).to.have.property(\"firstname\");\r",
+							"    pm.expect(jsonData.booking).to.have.property(\"lastname\");\r",
+							"    pm.expect(jsonData.booking).to.have.property(\"totalprice\");\r",
+							"    pm.expect(jsonData.booking).to.have.property(\"depositpaid\");\r",
+							"    pm.expect(jsonData.booking).to.have.property(\"bookingdates\");\r",
+							"    pm.expect(jsonData.booking).to.have.property(\"additionalneeds\");\r",
+							"\r",
+							"    // Check if \"bookingdates\" object contains required fields\r",
+							"    pm.expect(jsonData.booking.bookingdates).to.have.property(\"checkin\");\r",
+							"    pm.expect(jsonData.booking.bookingdates).to.have.property(\"checkout\");\r",
+							"\r",
+							"    pm.environment.set(\"bookingid\", jsonData.bookingid);\r",
+							"    console.log(\"bookingid\", jsonData.bookingid);\r",
+							"    pm.environment.set(\"firstname\", jsonData.booking.firstname);\r",
+							"    pm.environment.set(\"lastname\", jsonData.booking.lastname);\r",
+							"    pm.environment.set(\"checkin\", jsonData.booking.bookingdates.checkin);\r",
+							"    pm.environment.set(\"checkout\", jsonData.booking.bookingdates.checkout);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"firstname\" : \"{{firstname}}\",\r\n    \"lastname\" : \"{{lastname}}\",\r\n    \"totalprice\" : {{totalprice}},\r\n    \"depositpaid\" : {{depositpaid}},\r\n    \"bookingdates\" : {\r\n        \"checkin\" : \"{{checkin}}\",\r\n        \"checkout\" : \"{{checkout}}\"\r\n    },\r\n    \"additionalneeds\" : \"{{additionalneeds}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/booking",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"booking"
+					]
+				},
+				"description": "Generated from cURL: curl -X POST \\\r\n  https://restful-booker.herokuapp.com/booking \\\r\n  -H 'Content-Type: application/json' \\\r\n  -d '{\r\n    \"firstname\" : \"Jim\",\r\n    \"lastname\" : \"Brown\",\r\n    \"totalprice\" : 111,\r\n    \"depositpaid\" : true,\r\n    \"bookingdates\" : {\r\n        \"checkin\" : \"2018-01-01\",\r\n        \"checkout\" : \"2019-01-01\"\r\n    },\r\n    \"additionalneeds\" : \"Breakfast\"\r\n}'\r\n"
+			},
+			"response": []
+		},
+		{
+			"name": "booking with id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Check if response code is 200 (OK)\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response is valid JSON\", function () {\r",
+							"    pm.response.to.be.json;\r",
+							"});\r",
+							"\r",
+							"let jsonData = pm.response.json();  // Parse JSON response\r",
+							"\r",
+							"// Compare GET response with stored values from POST response\r",
+							"pm.test(\"Verify GET response matches POST data\", function () {\r",
+							"    pm.expect(jsonData.firstname).to.eql(pm.environment.get(\"firstname\"));\r",
+							"    pm.expect(jsonData.lastname).to.eql(pm.environment.get(\"lastname\"));\r",
+							"    pm.expect(jsonData.bookingdates.checkin).to.eql(pm.environment.get(\"checkin\"));\r",
+							"    pm.expect(jsonData.bookingdates.checkout).to.eql(pm.environment.get(\"checkout\"));\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/booking/{{bookingid}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"booking",
+						"{{bookingid}}"
+					]
+				},
+				"description": "Generated from cURL: curl -i https://restful-booker.herokuapp.com/booking/1\r\n"
+			},
+			"response": []
+		},
+		{
+			"name": "allbookings",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Check if response code is 200 (OK)\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response is a JSON array\", function () {\r",
+							"    let jsonData = pm.response.json();  // Parse response\r",
+							"    pm.expect(jsonData).to.be.an(\"array\");  // Ensure it's an array\r",
+							"    pm.expect(jsonData.length).to.be.greaterThan(0); // Ensure it's not empty\r",
+							"\r",
+							"    // Verify each item inside the array is a JSON object\r",
+							"  /*  jsonData.forEach((item, index) => {\r",
+							"        pm.test(`Item ${index + 1} is a valid JSON object`, function () {\r",
+							"            pm.expect(item).to.be.an(\"object\"); // Each item should be an object\r",
+							"        });\r",
+							"    });\r",
+							"    */\r",
+							"\r",
+							"    console.log(\"Response JSON Array:\", jsonData);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{url}}/booking",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"booking"
+					]
+				},
+				"description": "Generated from cURL: curl -i https://restful-booker.herokuapp.com/booking\r\n"
+			},
+			"response": []
+		},
+		{
+			"name": "replace with id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Check if response code is 200 (OK)\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"        pm.expect([200, 201]).to.include(pm.response.code);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response contains expected keys\", function () {\r",
+							"    let jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData).to.have.property(\"firstname\");\r",
+							"    pm.expect(jsonData).to.have.property(\"lastname\");\r",
+							"    pm.expect(jsonData).to.have.property(\"totalprice\");\r",
+							"    pm.expect(jsonData).to.have.property(\"depositpaid\");\r",
+							"    pm.expect(jsonData).to.have.property(\"bookingdates\");\r",
+							"    pm.expect(jsonData.bookingdates).to.have.property(\"checkin\");\r",
+							"    pm.expect(jsonData.bookingdates).to.have.property(\"checkout\");\r",
+							"    pm.expect(jsonData).to.have.property(\"additionalneeds\");\r",
+							"\r",
+							"    pm.environment.set(\"firstname\", jsonData.firstname);\r",
+							"    pm.environment.set(\"lastname\", jsonData.lastname);\r",
+							"    pm.environment.set(\"checkin\", jsonData.bookingdates.checkin);\r",
+							"    pm.environment.set(\"checkout\", jsonData.bookingdates.checkout); \r",
+							"});\r",
+							"\r",
+							"\r",
+							"pm.test(\"Verify PUT response matches data\", function () {\r",
+							"     let jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.firstname).to.eql(pm.environment.get(\"firstname\"));\r",
+							"    pm.expect(jsonData.lastname).to.eql(pm.environment.get(\"lastname\"));\r",
+							"    pm.expect(jsonData.bookingdates.checkin).to.eql(pm.environment.get(\"checkin\"));\r",
+							"    pm.expect(jsonData.bookingdates.checkout).to.eql(pm.environment.get(\"checkout\"));\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Function to generate a realistic-looking random first name\r",
+							"function generateRandomFirstName() {\r",
+							"    const prefixes = [\"Jo\", \"Em\", \"Mi\", \"Li\", \"Da\", \"El\", \"Sa\", \"Chr\", \"Ol\", \"Al\"];\r",
+							"    const suffixes = [\"hn\", \"ily\", \"chael\", \"am\", \"vid\", \"ex\", \"rah\", \"is\", \"ivia\", \"ice\"];\r",
+							"    return prefixes[Math.floor(Math.random() * prefixes.length)] + suffixes[Math.floor(Math.random() * suffixes.length)];\r",
+							"}\r",
+							"\r",
+							"// Function to generate a realistic-looking random last name\r",
+							"function generateRandomLastName() {\r",
+							"    const prefixes = [\"Smi\", \"Joh\", \"Bro\", \"Tay\", \"Wil\", \"Dav\", \"And\", \"Mil\", \"Tho\", \"Gar\"];\r",
+							"    const suffixes = [\"th\", \"son\", \"wn\", \"lor\", \"son\", \"is\", \"erson\", \"ler\", \"mas\", \"cia\"];\r",
+							"    return prefixes[Math.floor(Math.random() * prefixes.length)] + suffixes[Math.floor(Math.random() * suffixes.length)];\r",
+							"}\r",
+							"\r",
+							"// Function to generate a random price between 50 and 500\r",
+							"function getRandomPrice() {\r",
+							"    return Math.floor(Math.random() * (500 - 50 + 1)) + 50;\r",
+							"}\r",
+							"\r",
+							"// Function to generate a random boolean\r",
+							"function getRandomBoolean() {\r",
+							"    return Math.random() < 0.5;\r",
+							"}\r",
+							"\r",
+							"// Function to generate a random date between a given range\r",
+							"function getRandomDate(start, end) {\r",
+							"    const date = new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()));\r",
+							"    return date.toISOString().split(\"T\")[0]; // Format: YYYY-MM-DD\r",
+							"}\r",
+							"\r",
+							"// Function to generate a random additional need\r",
+							"function getRandomAdditionalNeed() {\r",
+							"    const words = [\"Breakfast\", \"Lunch\", \"Dinner\", \"WiFi\", \"Parking\", \"Air Conditioning\"];\r",
+							"    return words[Math.floor(Math.random() * words.length)];\r",
+							"}\r",
+							"\r",
+							"// Generate and set variables\r",
+							"pm.variables.set(\"firstname\", generateRandomFirstName());\r",
+							"pm.variables.set(\"lastname\", generateRandomLastName());\r",
+							"pm.variables.set(\"totalprice\", getRandomPrice());\r",
+							"pm.variables.set(\"depositpaid\", getRandomBoolean());\r",
+							"\r",
+							"const checkinDate = getRandomDate(new Date(\"2023-01-01\"), new Date());\r",
+							"const checkoutDate = getRandomDate(new Date(checkinDate), new Date(\"2025-12-31\"));\r",
+							"\r",
+							"pm.variables.set(\"checkin\", checkinDate);\r",
+							"pm.variables.set(\"checkout\", checkoutDate);\r",
+							"pm.variables.set(\"additionalneeds\", getRandomAdditionalNeed());\r",
+							"\r",
+							"// Log generated data in Postman Console\r",
+							"console.log(\"Generated Test Data:\");\r",
+							"console.log(\"First Name:\", pm.variables.get(\"firstname\"));\r",
+							"console.log(\"Last Name:\", pm.variables.get(\"lastname\"));\r",
+							"console.log(\"Total Price:\", pm.variables.get(\"totalprice\"));\r",
+							"console.log(\"Deposit Paid:\", pm.variables.get(\"depositpaid\"));\r",
+							"console.log(\"Check-in Date:\", pm.variables.get(\"checkin\"));\r",
+							"console.log(\"Check-out Date:\", pm.variables.get(\"checkout\"));\r",
+							"console.log(\"Additional Needs:\", pm.variables.get(\"additionalneeds\"));"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Cookie",
+						"value": "token= {{auth_token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"firstname\" : \"{{firstname}}\",\r\n    \"lastname\" : \"{{lastname}}\",\r\n    \"totalprice\" : {{totalprice}},\r\n    \"depositpaid\" : {{depositpaid}},\r\n    \"bookingdates\" : {\r\n        \"checkin\" : \"{{checkin}}\",\r\n        \"checkout\" : \"{{checkout}}\"\r\n    },\r\n    \"additionalneeds\" : \"{{additionalneeds}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/booking/{{bookingid}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"booking",
+						"{{bookingid}}"
+					]
+				},
+				"description": "Generated from cURL: curl -X PUT \\\r\n  https://restful-booker.herokuapp.com/booking/1 \\\r\n  -H 'Content-Type: application/json' \\\r\n  -H 'Accept: application/json' \\\r\n  -H 'Cookie: token=abc123' \\\r\n  -d '{\r\n    \"firstname\" : \"James\",\r\n    \"lastname\" : \"Brown\",\r\n    \"totalprice\" : 111,\r\n    \"depositpaid\" : true,\r\n    \"bookingdates\" : {\r\n        \"checkin\" : \"2018-01-01\",\r\n        \"checkout\" : \"2019-01-01\"\r\n    },\r\n    \"additionalneeds\" : \"Breakfast\"\r\n}'\r\n"
+			},
+			"response": []
+		},
+		{
+			"name": "update with id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Check if response code is 200 (OK)\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response is valid JSON\", function () {\r",
+							"    pm.response.to.be.json;\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response contains expected keys\", function () {\r",
+							"    let jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData).to.have.property(\"firstname\");\r",
+							"    pm.expect(jsonData).to.have.property(\"lastname\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"// Function to generate a realistic-looking random first name\r",
+							"function generateRandomFirstName() {\r",
+							"    const prefixes = [\"Jo\", \"Em\", \"Mi\", \"Li\", \"Da\", \"El\", \"Sa\", \"Chr\", \"Ol\", \"Al\"];\r",
+							"    const suffixes = [\"hn\", \"ily\", \"chael\", \"am\", \"vid\", \"ex\", \"rah\", \"is\", \"ivia\", \"ice\"];\r",
+							"    return prefixes[Math.floor(Math.random() * prefixes.length)] + suffixes[Math.floor(Math.random() * suffixes.length)];\r",
+							"}\r",
+							"\r",
+							"// Function to generate a realistic-looking random last name\r",
+							"function generateRandomLastName() {\r",
+							"    const prefixes = [\"Smi\", \"Joh\", \"Bro\", \"Tay\", \"Wil\", \"Dav\", \"And\", \"Mil\", \"Tho\", \"Gar\"];\r",
+							"    const suffixes = [\"th\", \"son\", \"wn\", \"lor\", \"son\", \"is\", \"erson\", \"ler\", \"mas\", \"cia\"];\r",
+							"    return prefixes[Math.floor(Math.random() * prefixes.length)] + suffixes[Math.floor(Math.random() * suffixes.length)];\r",
+							"}\r",
+							"\r",
+							"// Generate and set variables\r",
+							"pm.variables.set(\"firstname\", generateRandomFirstName());\r",
+							"pm.variables.set(\"lastname\", generateRandomLastName());\r",
+							"\r",
+							"// Log generated data in Postman Console\r",
+							"console.log(\"Generated Test Data:\");\r",
+							"console.log(\"First Name:\", pm.variables.get(\"firstname\"));\r",
+							"console.log(\"Last Name:\", pm.variables.get(\"lastname\"));"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"method": "PATCH",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Accept",
+						"value": "application/json"
+					},
+					{
+						"key": "Cookie",
+						"value": "token={{auth_token}}"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"firstname\" : \"{{firstname}}\",\r\n    \"lastname\" : \"{{lastname}}\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{url}}/booking/{{bookingid}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"booking",
+						"{{bookingid}}"
+					]
+				},
+				"description": "Generated from cURL: curl -X PATCH \\\r\n  https://restful-booker.herokuapp.com/booking/1 \\\r\n  -H 'Content-Type: application/json' \\\r\n  -H 'Accept: application/json' \\\r\n  -H 'Cookie: token=abc123' \\\r\n  -d '{\r\n    \"firstname\" : \"James\",\r\n    \"lastname\" : \"Brown\"\r\n}'"
+			},
+			"response": []
+		},
+		{
+			"name": "delete with id",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Check if response code is 200 (OK)\r",
+							"pm.test(\"Response status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Response body matches expected message\", function () {\r",
+							"    pm.response.to.have.body(\"Deleted\");\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disabledSystemHeaders": {}
+			},
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					},
+					{
+						"key": "Cookie",
+						"value": "token={{auth_token}}"
+					}
+				],
+				"url": {
+					"raw": "{{url}}/booking/{{bookingid}}",
+					"host": [
+						"{{url}}"
+					],
+					"path": [
+						"booking",
+						"{{bookingid}}"
+					]
+				},
+				"description": "Generated from cURL: curl -X DELETE \\\r\n  https://restful-booker.herokuapp.com/booking/1 \\\r\n  -H 'Content-Type: application/json' \\\r\n  -H 'Cookie: token=abc123'\r\n"
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "$token",
+			"value": "",
+			"type": "default"
+		}
+	]
+}
